@@ -1,0 +1,54 @@
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'dev.flutter.flutter-gradle-plugin'
+    id 'com.google.gms.google-services'
+}
+
+dependencies {
+    // Importa a Firebase BoM (Bill of Materials)
+    implementation(platform("com.google.firebase:firebase-bom:33.5.1"))
+
+    // Exemplo de dependências do Firebase que você pode querer usar:
+    // Firebase Authentication
+    implementation("com.google.firebase:firebase-auth")
+
+    // Firebase Firestore
+    implementation("com.google.firebase:firebase-firestore")
+
+    // Adicione outras dependências conforme necessário para os serviços que deseja usar
+}
+
+android {
+    namespace = "com.example.myapp"
+    compileSdkVersion 34 // Substitua com a versão SDK que deseja usar
+    ndkVersion "21.3.6528147" // Substitua pela sua versão do NDK, se aplicável
+
+    compileOptions {
+        sourceCompatibility JavaVersion.VERSION_1_8
+        targetCompatibility JavaVersion.VERSION_1_8
+    }
+
+    kotlinOptions {
+        jvmTarget = "1.8"
+    }
+
+    defaultConfig {
+        applicationId "com.example.myapp"
+        minSdkVersion 23 // Substitua com a versão mínima de SDK necessária
+        targetSdkVersion 33 // Substitua com a versão SDK alvo
+        versionCode 1
+        versionName "1.0"
+    }
+
+    buildTypes {
+        release {
+            signingConfig signingConfigs.debug
+        }
+    }
+}
+
+
+flutter {
+    source = "../.."
+}

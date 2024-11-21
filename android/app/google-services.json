@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "241242365366",
+    "project_id": "n2-pdm",
+    "storage_bucket": "n2-pdm.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:241242365366:android:7d59ec56580310e4a4f517",
+        "android_client_info": {
+          "package_name": "com.example.myapp"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD_X8lyqBPCgTVpFMOhR-yM0gjxO1KUzpY"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
