@@ -16,6 +16,7 @@ dependencies {
     // Firebase Firestore
     implementation("com.google.firebase:firebase-firestore")
 
+  implementation "com.google.android.gms:play-services-auth:20.7.0"
     // Adicione outras dependências conforme necessário para os serviços que deseja usar
 }
 
@@ -46,9 +47,25 @@ android {
             signingConfig signingConfigs.debug
         }
     }
+    signingConfigs {
+        release {
+            storeFile file("/home/user/myapp/android/my-release-key.jks")  // Substitua pelo caminho correto do keystore
+            storePassword "admin2"
+            keyAlias "novo_alias"
+            keyPassword "admin2"
+        }
+    }
+    buildTypes {
+        release {
+            signingConfig signingConfigs.release
+        }
+    }
 }
 
 
 flutter {
     source = "../.."
 }
+
+apply plugin: 'com.android.application'
+apply plugin: 'com.google.gms.google-services' // Para Firebase

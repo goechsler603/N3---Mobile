@@ -14,10 +14,12 @@ class AndamentoScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {}, // Ação para o ícone de perfil
-            icon: Icon(Icons.person), // Ícone de perfil
-          ),
+         IconButton(
+    onPressed: () {
+      Navigator.pushNamed(context, 'PerfilScreen');
+    },
+    icon: Icon(Icons.person),
+  ),
         ],
       ),
       body: SingleChildScrollView(

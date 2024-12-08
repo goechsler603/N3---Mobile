@@ -14,10 +14,12 @@ class HistoricoScreen extends StatelessWidget {
           ],
         ),
         actions: [
-          IconButton(
-            onPressed: () {}, // Ação do botão do usuário
-            icon: Icon(Icons.person), // Ícone do botão do usuário
-          ),
+         IconButton(
+    onPressed: () {
+      Navigator.pushNamed(context, 'PerfilScreen');
+    },
+    icon: Icon(Icons.person),
+  ),
         ],
       ),
       body: SingleChildScrollView(

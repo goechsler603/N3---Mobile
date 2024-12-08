@@ -1,8 +1,22 @@
+// 1. O bloco buildscript deve vir antes do plugins
+buildscript {
+    repositories {
+        google()
+        mavenCentral()
+    }
+    dependencies {
+        // Adicionando a dependência do plugin
+        classpath 'com.google.gms:google-services:4.3.15' // Corrigido para a versão correta
+    }
+}
+
+// 2. O bloco plugins deve vir depois do buildscript
 plugins {
     id 'com.android.application' version "8.1.0" apply false
     id 'com.google.gms.google-services' version '4.4.2' apply false
 }
 
+// 3. Repositórios para todos os projetos
 allprojects {
     repositories {
         google()
@@ -10,15 +24,18 @@ allprojects {
     }
 }
 
+// 4. Diretórios de build
 rootProject.buildDir = "../build"
 subprojects {
     project.buildDir = "${rootProject.buildDir}/${project.name}"
 }
+
+// 5. Avaliação de subprojetos
 subprojects {
     project.evaluationDependsOn(":app")
 }
 
+// 6. Tarefa de limpeza
 tasks.create("clean", Delete) {
     delete rootProject.buildDir
 }
-

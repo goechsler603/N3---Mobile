@@ -1,79 +1,147 @@
 import 'package:flutter/material.dart';
 import 'package:firebase_core/firebase_core.dart';
+import 'package:firebase_auth/firebase_auth.dart';
+import 'package:google_sign_in/google_sign_in.dart';
 import 'package:cloud_firestore/cloud_firestore.dart';
-import 'andamento.dart'; // Certifique-se de ter esses arquivos
-import 'historico.dart'; // Importa a tela de histórico
+import 'andamento.dart';  // Certifique-se de ter esses arquivos
+import 'historico.dart';
+import 'perfil.dart'; // Tela de perfil
 
 void main() async {
-  WidgetsFlutterBinding.ensureInitialized(); // Inicializa os bindings do Flutter
-  await Firebase.initializeApp(); // Inicializa o Firebase
-  runApp(MyApp()); // Inicia o aplicativo Flutter
+  WidgetsFlutterBinding.ensureInitialized();
+  await Firebase.initializeApp();  // Inicializa o Firebase
+  
+  // Desconectar do Google sempre que o app iniciar
+  await _logoutGoogle();
+  
+  runApp(MyApp());
+}
+
+Future<void> _logoutGoogle() async {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Verifica se o usuário está logado e faz o logout
+  if (await _googleSignIn.isSignedIn()) {
+    await _googleSignIn.signOut();
+  }
+
+  // Logout do Firebase Auth
+  await _auth.signOut();
 }
 
 class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      home: HomePage(), // Define a HomePage como tela inicial
+      home: LoginScreen(),
       routes: {
-        'HomeScreen': (context) => HomePage(), // Rota para a tela inicial
-        'AndamentoScreen': (context) => AndamentoScreen(), // Rota para a tela de andamento
-        'HistoricoScreen': (context) => HistoricoScreen(), // Rota para a tela de histórico
+        'HomeScreen': (context) => HomePage(),
+        'AndamentoScreen': (context) => AndamentoScreen(),
+        'HistoricoScreen': (context) => HistoricoScreen(),
+        'PerfilScreen': (context) => PerfilScreen(),
       },
+    );
+  }
+}
+
+class LoginScreen extends StatelessWidget {
+  final FirebaseAuth _auth = FirebaseAuth.instance;
+  final GoogleSignIn _googleSignIn = GoogleSignIn();
+
+  // Função para fazer login com o Google
+  Future<void> _loginWithGoogle(BuildContext context) async {
+    try {
+      final GoogleSignInAccount? googleUser = await _googleSignIn.signIn();
+      if (googleUser == null) {
+        return;  // Se o usuário cancelar o login
+      }
+
+      final GoogleSignInAuthentication googleAuth = await googleUser.authentication;
+      final AuthCredential credential = GoogleAuthProvider.credential(
+        accessToken: googleAuth.accessToken,
+        idToken: googleAuth.idToken,
+      );
+
+      // Realiza o login no Firebase
+      await _auth.signInWithCredential(credential);
+
+      // Navega para a HomePage após o login
+      Navigator.pushReplacement(
+        context,
+        MaterialPageRoute(
+          builder: (context) => HomePage(),
+        ),
+      );
+    } catch (e) {
+      print("Erro no login com o Google: $e");
+    }
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      appBar: AppBar(title: Text('Login com Google')),
+      body: Center(
+        child: ElevatedButton(
+          onPressed: () => _loginWithGoogle(context),
+          child: Text('Entrar com o Google'),
+        ),
+      ),
     );
   }
 }
 
 class HomePage extends StatefulWidget {
   @override
-  _HomePageState createState() => _HomePageState(); // Cria o estado da HomePage
+  _HomePageState createState() => _HomePageState();
 }
 
 class _HomePageState extends State<HomePage> {
-  final PageController _pageController = PageController(); // Controlador do carrossel de imagens
-  int _currentPage = 0; // Página atual do carrossel
+  final PageController _pageController = PageController();
+  int _currentPage = 0;
 
-  // Navegação para a próxima página do carrossel
+  // Navegação para a próxima página
   void _nextPage() {
-    if (_currentPage < 3) { // Verifica se não está na última página
-      _currentPage++; // Avança para a próxima página
+    if (_currentPage < 3) {
+      _currentPage++;
       _pageController.animateToPage(
         _currentPage,
-        duration: Duration(milliseconds: 300), // Duração da animação
-        curve: Curves.easeInOut, // Curva de animação
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
     }
   }
 
-  // Navegação para a página anterior do carrossel
+  // Navegação para a página anterior
   void _previousPage() {
-    if (_currentPage > 0) { // Verifica se não está na primeira página
-      _currentPage--; // Retorna para a página anterior
+    if (_currentPage > 0) {
+      _currentPage--;
       _pageController.animateToPage(
         _currentPage,
-        duration: Duration(milliseconds: 300), // Duração da animação
-        curve: Curves.easeInOut, // Curva de animação
+        duration: Duration(milliseconds: 300),
+        curve: Curves.easeInOut,
       );
     }
   }
 
-  // Exibe um popup para inserir a data do curso
+  // Função para exibir o popup de data
   void _showPopup(String courseName) {
     showDialog(
       context: context,
       builder: (BuildContext context) {
-        TextEditingController dateController = TextEditingController(); // Controlador para o campo de data
+        TextEditingController dateController = TextEditingController();
 
         return AlertDialog(
-          title: Text(courseName), // Título do popup com o nome do curso
+          title: Text(courseName),
           content: Column(
-            mainAxisSize: MainAxisSize.min, // Define o tamanho mínimo da coluna
+            mainAxisSize: MainAxisSize.min,
             children: [
               TextField(
-                controller: dateController, // Associa o controlador ao campo de texto
+                controller: dateController,
                 decoration: InputDecoration(
-                  labelText: 'Insira a data', // Rótulo do campo de texto
-                  hintText: 'dd/mm/aaaa', // Dica sobre o formato da data
+                  labelText: 'Insira a data',
+                  hintText: 'dd/mm/aaaa',
                 ),
               ),
             ],
@@ -81,20 +149,20 @@ class _HomePageState extends State<HomePage> {
           actions: [
             ElevatedButton(
               onPressed: () async {
-                String chosenDate = dateController.text; // Captura a data inserida
+                String chosenDate = dateController.text;
 
-                // Referência do documento do curso
-                DocumentReference courseRef = FirebaseFirestore.instance.collection('cursos').doc(courseName.replaceAll(' ', '_').toLowerCase());
+                DocumentReference courseRef = FirebaseFirestore.instance
+                    .collection('cursos')
+                    .doc(courseName.replaceAll(' ', '_').toLowerCase());
 
-                // Cria ou atualiza o documento do curso
                 await courseRef.set({
-                  'nome': courseName, // Armazena o nome do curso
-                  'dataEscolhida': chosenDate // Adiciona a data escolhida
-                }, SetOptions(merge: true)); // Usa merge para evitar substituição de dados existentes
+                  'nome': courseName,
+                  'dataEscolhida': chosenDate,
+                }, SetOptions(merge: true));
 
-                Navigator.of(context).pop(); // Fecha o popup
+                Navigator.of(context).pop();
               },
-              child: Text('Salvar data'), // Texto do botão para salvar a data
+              child: Text('Salvar data'),
             ),
           ],
         );
@@ -105,97 +173,92 @@ class _HomePageState extends State<HomePage> {
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: const Color(0xFFCCDADA), // Cor de fundo da tela
+      backgroundColor: const Color(0xFFCCDADA),
       appBar: AppBar(
-        backgroundColor: const Color(0xFF0D47A1), // Cor da AppBar
+        backgroundColor: const Color(0xFF0D47A1),
         title: Row(
           children: [
-            Image.asset('assets/logo.png', height: 40), // Logo no título da AppBar
+            Image.asset('assets/logo.png', height: 40),
           ],
         ),
         actions: [
           IconButton(
-            onPressed: () {}, // Ação para o ícone de perfil
-            icon: Icon(Icons.person), // Ícone de perfil
+            onPressed: () {
+              Navigator.pushNamed(context, 'PerfilScreen');
+            },
+            icon: Icon(Icons.person),
           ),
         ],
       ),
       body: SingleChildScrollView(
         child: Column(
           children: [
-            // Banner
             Container(
-              margin: EdgeInsets.all(8), // Margem ao redor do banner
-              child: Image.asset('assets/Banner.png'), // Imagem do banner
+              margin: EdgeInsets.all(8),
+              child: Image.asset('assets/Banner.png'),
             ),
-
-            // Botões
             Row(
-              mainAxisAlignment: MainAxisAlignment.spaceEvenly, // Alinha os botões no centro
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
-                _buildIconButton('Cursos', Icons.book, () { // Botão para cursos
-                  _showPopup('Curso de APP'); // Mostra popup ao clicar
+                _buildIconButton('Cursos', Icons.book, () {
+                  _showPopup('Curso de APP');
                 }),
-                _buildIconButton('Andamento', Icons.edit, () { // Botão para andamento
-                  Navigator.pushNamed(context, 'AndamentoScreen'); // Navega para a tela de andamento
+                _buildIconButton('Andamento', Icons.edit, () {
+                  Navigator.pushNamed(context, 'AndamentoScreen');
                 }),
-                _buildIconButton('Histórico', Icons.school, () { // Botão para histórico
-                  Navigator.pushNamed(context, 'HistoricoScreen'); // Navega para a tela de histórico
+                _buildIconButton('Histórico', Icons.school, () {
+                  Navigator.pushNamed(context, 'HistoricoScreen');
                 }),
               ],
             ),
-            SizedBox(height: 20), // Espaço entre os botões e o título do carrossel
-
-            // Título do carrossel
+            SizedBox(height: 20),
             Padding(
-              padding: const EdgeInsets.all(8.0), // Preenchimento ao redor do título
+              padding: const EdgeInsets.all(8.0),
               child: Text(
-                'CURSOS', // Título do carrossel
-                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold), // Estilo do texto
+                'CURSOS',
+                style: TextStyle(fontSize: 24, fontWeight: FontWeight.bold),
               ),
             ),
-
-            // Carrossel de imagens
             SizedBox(
-              height: 200, // Altura do carrossel
+              height: 200,
               child: Row(
-                mainAxisAlignment: MainAxisAlignment.center, // Alinha o carrossel no centro
+                mainAxisAlignment: MainAxisAlignment.center,
                 children: [
                   IconButton(
-                    onPressed: _previousPage, // Botão para página anterior
-                    icon: Icon(Icons.arrow_back), // Ícone de seta para trás
+                    onPressed: _previousPage,
+                    icon: Icon(Icons.arrow_back),
                   ),
                   Expanded(
                     child: PageView(
-                      controller: _pageController, // Controlador do carrossel
-                      onPageChanged: (index) { // Atualiza a página atual
+                      controller: _pageController,
+                      onPageChanged: (index) {
                         setState(() {
-                          _currentPage = index; // Atualiza o índice da página atual
+                          _currentPage = index;
                         });
                       },
                       children: [
                         GestureDetector(
-                          onTap: () => _showPopup('Curso de APP'), // Mostra popup ao tocar na imagem
-                          child: Image.asset('assets/app.png'), // Imagem do curso de APP
+                          onTap: () => _showPopup('Curso de APP'),
+                          child: Image.asset('assets/app.png'),
                         ),
                         GestureDetector(
-                          onTap: () => _showPopup('Curso de APQ'), // Mostra popup ao tocar na imagem
-                          child: Image.asset('assets/apq.png'), // Imagem do curso de APQ
+                          onTap: () => _showPopup('Curso de APQ'),
+                          child: Image.asset('assets/apq.png'),
                         ),
                         GestureDetector(
-                          onTap: () => _showPopup('Curso de WMS'), // Mostra popup ao tocar na imagem
-                          child: Image.asset('assets/wms.png'), // Imagem do curso de WMS
+                          onTap: () => _showPopup('Curso de WMS'),
+                          child: Image.asset('assets/wms.png'),
                         ),
                         GestureDetector(
-                          onTap: () => _showPopup('Curso de Office'), // Mostra popup ao tocar na imagem
-                          child: Image.asset('assets/office.png'), // Imagem do curso de Office
+                          onTap: () => _showPopup('Curso de Office'),
+                          child: Image.asset('assets/office.png'),
                         ),
                       ],
                     ),
                   ),
                   IconButton(
-                    onPressed: _nextPage, // Botão para próxima página
-                    icon: Icon(Icons.arrow_forward), // Ícone de seta para frente
+                    onPressed: _nextPage,
+                    icon: Icon(Icons.arrow_forward),
                   ),
                 ],
               ),
@@ -206,20 +269,20 @@ class _HomePageState extends State<HomePage> {
     );
   }
 
-  // Função que cria um botão com ícone
+  // Função para criar botões com ícones
   Widget _buildIconButton(String label, IconData icon, VoidCallback onPressed) {
     return Column(
       children: [
         GestureDetector(
-          onTap: onPressed, // Ação ao tocar no botão
+          onTap: onPressed,
           child: CircleAvatar(
-            radius: 30, // Raio do círculo do botão
-            backgroundColor: Colors.blue, // Cor de fundo do botão
-            child: Icon(icon, color: Colors.white, size: 30), // Ícone do botão
+            radius: 30,
+            backgroundColor: Colors.blue,
+            child: Icon(icon, color: Colors.white, size: 30),
           ),
         ),
-        SizedBox(height: 8), // Espaço entre o botão e o texto
-        Text(label), // Texto abaixo do botão
+        SizedBox(height: 8),
+        Text(label),
       ],
     );
   }
