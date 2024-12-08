@@ -1,20 +1,53 @@
-<<<<<<< HEAD
-# myapp
+# N3-Mobile
 
-A new Flutter project.
+### App de autenticação no Google, com Flutter e Firebase
+### Desenvolvido por: Guilherme Oechsler, Jeliel Flores Moura e José Mateus Coelho Loose.
 
-## Getting Started
+## Listagem de funções por tela
 
-This project is a starting point for a Flutter application.
+### Tela Home
 
-A few resources to get you started if this is your first Flutter project:
+- Exibe um icone que leva para o perfil do usuário.
+- Três botões de navegação referente aos cursos as opcões são: CURSOS, EM ANDAMENTO e HISTÓRICO.
+- Um carrossel com os cursos disponíveis.
 
-- [Lab: Write your first Flutter app](https://docs.flutter.dev/get-started/codelab)
-- [Cookbook: Useful Flutter samples](https://docs.flutter.dev/cookbook)
+### Tela de Andamento dos cursos
 
-For help getting started with Flutter development, view the
-[online documentation](https://docs.flutter.dev/), which offers tutorials,
-samples, guidance on mobile development, and a full API reference.
-=======
-# N2-PDM-A
->>>>>>> 34aa04754d31cc8246f9f2d87fada8a36382e0b0
+- Vai buscar informações no banco de dados e mostrar o andamento do(s) curso(s) que o usuário está realizando, caso houver.
+
+### Tela Histórico
+
+- Vai buscar informações no banco de dados e mostrar o(s) curso(s) que o usuário concluiu, caso houver.
+
+### Tela de Login
+
+- Descrição:
+    - Botão que chama signInWithGoogle ao ser pressionado.
+    - Tenta autenticar o usuário via Google utilizando o FirebaseAuth e GoogleSignIn.
+    - Realiza a autenticação por meio de credenciais obtidas no Google (accessToken e idToken).
+    - Se a autenticação for bem-sucedida redireciona o usuário para a tela de perfil (PerfilScreen).
+    - Caso contrário exibe mensagens no console para ajudar no diagnóstico de falhas.
+
+- Passo a passo no código:
+    - Usa GoogleSignIn para iniciar o fluxo de login.
+    - Obtém a autenticação do Google (GoogleSignInAuthentication).
+    - Gera credenciais do Firebase (GoogleAuthProvider.credential).
+    - Finaliza o login no Firebase com signInWithCredential.
+    - Navega para a tela de perfil com Navigator.pushReplacement
+
+## Listagem de dependências utilizadas
+
+- cloud_firestore: ^5.4.4
+- firebase_core: ^3.8.1
+- firebase_auth: ^5.3.4
+- cupertino_icons: ^1.0.8
+- google_sign_in: ^6.2.2
+
+### Versões utilizadas do Flutter e Dart
+
+- Flutter 3.24.3 
+- Dart 3.5.3
+
+### Versão mínima do SDK
+
+- Versão: 3.24.3
